@@ -29,11 +29,23 @@ const Navbar = () => {
       });
     }
   };
+  //console.log(auth);
+  const logout = () => {
+    auth.signOut();
+  };
   return (
     <>
       <div className="nav_bar">
         <div className="left">
-          <h2>Social Media App</h2>
+          {/* //<h2>Social Media App</h2> */}
+          {auth.currentUser ? (
+            <>
+              <img src={auth.currentUser?.photoURL} />
+              <h3>{auth.currentUser?.displayName}</h3>
+            </>
+          ) : (
+            <h2>Social Media App</h2>
+          )}
         </div>
         <div className="right">
           <button className="btn btn-warning mx-3" onClick={googleClick}>
@@ -42,7 +54,9 @@ const Navbar = () => {
           <button className="btn btn-warning mx-3">Post</button>
           <button className="btn btn-warning mx-3">Profile</button>
           <button className="btn btn-warning mx-3">All Users</button>
-          <button className="btn btn-warning mx-3">Logout</button>
+          <button className="btn btn-warning mx-3" onClick={logout}>
+            Logout
+          </button>
         </div>
       </div>
     </>
