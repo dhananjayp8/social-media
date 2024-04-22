@@ -1,49 +1,99 @@
-import React from "react";
-import "../index.css";
-
+import React, { useState } from "react";
+//import "../index.css";
+import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+import { db, storage } from "../firebaseConfig";
+import { getAuth } from "firebase/auth";
+import { addDoc, collection, serverTimestamp } from "firebase/firestore";
+import { useNavigate } from "react-router-dom";
 const AddPost = () => {
+  const auth = getAuth();
+  const navigate = useNavigate();
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [image, setImage] = useState(null);
+
+  const handleChange = (e) => {
+    if (e.target.files[0]) {
+      setImage(e.target.files[0]);
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const storageRef = ref(storage, `images/${image.name}`);
+      const uploadTask = uploadBytesResumable(storageRef, image);
+      await uploadTask;
+
+      const url = await getDownloadURL(uploadTask.snapshot.ref);
+      console.log("Download url :", url);
+      const data = {
+        author: auth.currentUser.displayName,
+        email: auth.currentUser.email,
+        photoUrl: auth.currentUser.photoURL,
+        userId: auth.currentUser.uid,
+        imageUrl: url,
+        title,
+        description,
+        time: serverTimestamp(),
+      };
+      const saveData = await addDoc(collection(db, "post"), data);
+      setDescription("");
+      setTitle("");
+      navigate("/");
+    } catch (error) {
+      console.error("Error", error.message);
+    }
+  };
   return (
     <>
-      <div classname="container add_post">
-        <htmform>
-          <div classname="mb-3">
-            <label htmFor="exampleInputEmail1" classname="htmform-label">
-              Email address
+      <div className="container add_post my-5">
+        <form onSubmit={handleSubmit}>
+          <div className="mb-3">
+            <label htmlFor="exampleInputEmail1" className="form-label">
+              Title
             </label>
             <input
-              type="email"
-              classname="htmform-control"
+              value={title}
+              type="text"
+              onChange={(e) => setTitle(e.target.value)}
+              className="form-control"
               id="exampleInputEmail1"
               aria-describedby="emailHelp"
+              required
             />
-            <div id="emailHelp" classname="htmform-text">
-              We'll never share your email with anyone else.
-            </div>
           </div>
-          <div classname="mb-3">
-            <label htmFor="exampleInputPassword1" classname="htmform-label">
-              Password
+          <div className="mb-3">
+            <label htmlFor="exampleInputPassword1" className="form-label">
+              Description
             </label>
             <input
-              type="password"
-              classname="htmform-control"
+              value={description}
+              type="text"
+              onChange={(e) => setDescription(e.target.value)}
+              className="form-control"
               id="exampleInputPassword1"
+              required
             />
           </div>
-          <div classname="mb-3 htmform-check">
-            <input
-              type="checkbox"
-              classname="htmform-check-input"
-              id="exampleCheck1"
-            />
-            <label classname="htmform-check-label" htmFor="exampleCheck1">
-              Check me out
+
+          <div className="mb-3">
+            <label htmlFor="exampleInputPassword1" className="form-label">
+              Img
             </label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleChange}
+              className="form-control"
+              id="exampleInputPassword1"
+              required
+            />
           </div>
-          <button type="submit" classname="btn btn-primary">
-            Submit
+          <button type="submit" className="btn btn-primary">
+            Add Post
           </button>
-        </htmform>
+        </form>
       </div>
     </>
   );
