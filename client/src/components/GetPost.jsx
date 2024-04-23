@@ -2,6 +2,7 @@ import React from "react";
 import { onSnapshot, collection, query, orderBy } from "firebase/firestore";
 import { db } from "../firebaseConfig";
 import { useState, useEffect } from "react";
+import Post from "./Post";
 const GetPost = () => {
   const [post, setPost] = useState([]);
   useEffect(() => {
@@ -19,7 +20,13 @@ const GetPost = () => {
     fetchData();
     console.log(post);
   }, []);
-  return <></>;
+  return (
+    <>
+      {post.map((data) => (
+        <Post key={data.id} data={data} />
+      ))}
+    </>
+  );
 };
 
 export default GetPost;

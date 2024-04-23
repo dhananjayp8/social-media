@@ -40,7 +40,7 @@ const Navbar = () => {
   };
   return (
     <>
-      <div className="nav_bar">
+      <div className="nav_bar sticky-top">
         <div className="left">
           <Link to={"/"} className="left">
             {/* //<h2>Social Media App</h2> */}
